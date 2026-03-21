@@ -5603,55 +5603,16 @@
 
     <script>
         // ===== GLOBAL MEAL PLAN FUNCTIONS (Safari compatible) =====
-        var mealRecipes = [
-            { id: 2, name: "Baked Chicken Leg Quarters", url: "https://youtube.com/watch?v=qxawM2dYLbQ", p: "chicken", ing: ["chicken leg quarters", "garlic", "onion", "lemon juice", "paprika", "salt", "pepper"] },
-            { id: 6, name: "Chinese Lemon Chicken", url: "https://youtube.com/watch?v=JVzSQcTRAaU", p: "chicken", ing: ["chicken breast", "egg", "corn starch", "lemon", "sugar", "soy sauce"] },
-            { id: 17, name: "KFC Style Fried Chicken", url: "https://youtube.com/watch?v=MWlHuWmnyek", p: "chicken", ing: ["chicken", "flour", "egg", "paprika", "garlic powder", "salt", "pepper"] },
-            { id: 18, name: "Korean Fried Chicken", url: "https://youtube.com/watch?v=aFLFujQNX9s", p: "chicken", ing: ["chicken wings", "potato starch", "gochujang", "soy sauce", "garlic", "honey"] },
-            { id: 82, name: "Braised Spicy Chicken", url: "https://youtube.com/watch?v=Ow_iwBu0cEQ", p: "chicken", ing: ["chicken", "potato", "carrot", "onion", "gochugaru", "soy sauce", "garlic"] },
-            { id: 214, name: "Chicken Curry", url: "https://youtube.com/watch?v=sEU7YWRnbJs", p: "chicken", ing: ["chicken", "potato", "carrot", "onion", "curry powder", "coconut milk"] },
-            { id: 33, name: "Tonkatsu", url: "https://youtube.com/watch?v=AtgqMOi2Ze4", p: "pork", ing: ["pork loin", "flour", "egg", "panko breadcrumbs", "cabbage", "tonkatsu sauce"] },
-            { id: 68, name: "Kimchi Stew", url: "https://youtube.com/watch?v=UOH6egrpTrI", p: "pork", ing: ["pork belly", "kimchi", "tofu", "gochugaru", "green onion", "garlic"] },
-            { id: 84, name: "Braised Pork Ribs", url: "https://youtube.com/watch?v=JVokLnlMHm4", p: "pork", ing: ["pork ribs", "soy sauce", "sugar", "garlic", "ginger", "green onion"] },
-            { id: 88, name: "Spicy Pork Belly", url: "https://youtube.com/watch?v=kmIM6qzxsnU", p: "pork", ing: ["pork belly", "gochujang", "gochugaru", "soy sauce", "garlic", "onion"] },
-            { id: 142, name: "Pork Belly Kimchi Fried Rice", url: "https://youtube.com/watch?v=Tvpzb3Hd6jE", p: "pork", ing: ["pork belly", "kimchi", "rice", "egg", "green onion", "sesame oil"] },
-            { id: 3, name: "Beef Sukiyaki", url: "https://youtube.com/watch?v=5sfy-hv0lxo", p: "beef", ing: ["beef slices", "tofu", "napa cabbage", "mushroom", "egg", "soy sauce", "mirin", "sugar"] },
-            { id: 31, name: "Taiwanese Beef Noodle Soup", url: "https://youtube.com/watch?v=HMNvoHx8Zuw", p: "beef", ing: ["beef shank", "noodles", "tomato", "star anise", "soy sauce", "green onion"] },
-            { id: 150, name: "Braised Beef Short Ribs", url: "https://youtube.com/watch?v=WZZWstwWUxg", p: "beef", ing: ["beef short ribs", "radish", "soy sauce", "garlic", "ginger", "green onion"] },
-            { id: 153, name: "Beef Radish Soup", url: "https://youtube.com/watch?v=ZMdYi7wG6JA", p: "beef", ing: ["beef", "radish", "green onion", "garlic", "soy sauce", "sesame oil"] },
-            { id: 156, name: "Beef Bulgogi", url: "https://youtube.com/watch?v=ZcM0Z0gu0zI", p: "beef", ing: ["beef sirloin", "pear", "soy sauce", "garlic", "onion", "sesame oil", "sugar"] },
-            { id: 12, name: "Gambas al Ajillo", url: "https://youtube.com/watch?v=QJ5rbwhMEZs", p: "fish", ing: ["shrimp", "garlic", "olive oil", "paprika", "parsley", "lemon"] },
-            { id: 57, name: "Grilled Mackerel", url: "https://youtube.com/watch?v=s6Fwr6Ebx3Y", p: "fish", ing: ["mackerel", "salt", "lemon", "radish"] },
-            { id: 59, name: "Braised Mackerel", url: "https://youtube.com/watch?v=xG_jL8luhF0", p: "fish", ing: ["mackerel", "radish", "gochugaru", "soy sauce", "garlic", "green onion"] },
-            { id: 145, name: "Shrimp Dish", url: "https://youtube.com/watch?v=GbwfCcxpkz4", p: "fish", ing: ["shrimp", "garlic", "butter", "parsley", "lemon", "salt"] },
-            { id: 183, name: "Salmon Rice Bowl", url: "https://youtube.com/watch?v=OZhe9QQZq64", p: "fish", ing: ["salmon", "rice", "soy sauce", "sesame seeds", "green onion", "seaweed"] },
-            { id: 94, name: "Grilled Tofu", url: "https://youtube.com/watch?v=SyYUGHA20Ck", p: "tofu", ing: ["tofu", "soy sauce", "sesame oil", "garlic", "green onion", "gochugaru"] },
-            { id: 100, name: "Braised Tofu", url: "https://youtube.com/watch?v=As8bN8Yr8oQ", p: "tofu", ing: ["tofu", "soy sauce", "gochugaru", "garlic", "green onion", "sesame oil"] },
-            { id: 119, name: "Miso Soup", url: "https://youtube.com/watch?v=ruJTdLppMjM", p: "tofu", ing: ["tofu", "miso paste", "dashi", "wakame seaweed", "green onion"] },
-            { id: 36, name: "Eggplant Side Dish", url: "https://youtube.com/watch?v=cAWTXFMRaE4", p: "tofu", ing: ["eggplant", "soy sauce", "garlic", "sesame oil", "green onion", "gochugaru"] },
-            { id: 49, name: "Egg Rice Bowl", url: "https://youtube.com/watch?v=L_dDUw_QuDU", p: "egg", ing: ["egg", "rice", "soy sauce", "butter", "green onion"] },
-            { id: 51, name: "Egg Fried Rice", url: "https://youtube.com/watch?v=CTBVKXxn438", p: "egg", ing: ["egg", "rice", "green onion", "soy sauce", "vegetable oil", "salt"] },
-            { id: 66, name: "Kimchi Fried Rice", url: "https://youtube.com/watch?v=wYWNvIleih4", p: "egg", ing: ["kimchi", "rice", "egg", "green onion", "sesame oil", "gochugaru"] },
-            { id: 149, name: "Shakshuka", url: "https://youtube.com/watch?v=qnrVmYbCjt0", p: "egg", ing: ["egg", "tomato", "onion", "garlic", "paprika", "cumin", "parsley"] },
-            { id: 246, name: "Gimbap", url: "https://youtube.com/watch?v=3aIQ0iw1qRE", p: "pork", ing: ["rice", "perilla leaves", "danmuji", "eggs", "spinach", "soy sauce", "mirin", "sesame oil"] },
-            { id: 247, name: "Ciabatta Sandwich (Rosemary)", url: "https://youtube.com/watch?v=DOhsHCCgOPA", p: "tofu", ing: ["cream cheese", "garlic", "rosemary", "parsley", "sriracha", "ciabatta bread", "tomato", "arugula", "parmesan", "olive oil"] },
-            { id: 248, name: "Potato Salad & French Chicken Stew", url: "https://youtube.com/watch?v=-K7UNrNtN_8", p: "chicken", ing: ["potatoes", "butter", "mustard", "mayo", "arugula", "chicken", "olive oil", "onion", "honey", "lemon", "fresh herbs"] },
-            { id: 249, name: "Soba with Shrimp Balls", url: "https://www.instagram.com/reel/C7QGyLJybM9/", p: "fish", ing: ["shrimp", "scallions", "ginger", "white pepper", "eggs", "potato starch", "dashi", "soy sauce", "mirin", "soba noodles"] },
-            { id: 250, name: "Soybean Paste Soup with Cabbage", url: "https://youtube.com/watch?v=5ka7NkZXB3o", p: "tofu", ing: ["cabbage", "soybean paste", "dried anchovies", "kelp", "garlic", "green onion", "tofu", "gochugaru"] },
-            { id: 251, name: "Cold Boiled Pork (수육)", url: "https://youtube.com/watch?v=F3d9odPcgek", p: "pork", ing: ["pork belly", "soybean paste", "garlic", "ginger", "soju", "onion", "black peppercorns", "bay leaves"] },
-            { id: 252, name: "Rice with Eggplant & Mushroom", url: "https://youtube.com/shorts/WDiU-0iMowI", p: "tofu", ing: ["rice", "eggplant", "mushrooms", "garlic", "soy sauce", "sesame oil", "green onion", "gochugaru"] },
-            { id: 253, name: "Sesame Steak Protein Bowl", url: "https://youtube.com/watch?v=7HLy4cwarhA", p: "beef", ing: ["beef steak", "rice", "edamame", "avocado", "sesame seeds", "soy sauce", "garlic", "ginger", "sriracha mayo"] },
-            { id: 254, name: "Butter Shrimp Pasta", url: "https://youtube.com/watch?v=GbwfCcxpkz4", p: "fish", ing: ["shrimp", "butter", "garlic", "white wine", "pasta", "parsley", "lemon", "red pepper flakes", "parmesan"] },
-            { id: 255, name: "Burrito Bowl", url: "https://youtube.com/watch?v=9zBGMtoTNIo", p: "chicken", ing: ["chicken", "rice", "black beans", "corn", "avocado", "salsa", "cheese", "sour cream", "lime", "cilantro"] }
-        ];
         var mealEmoji = { chicken: '🐔', pork: '🐷', beef: '🐄', fish: '🐟', tofu: '🧈', egg: '🥚' };
         var mealNames = { chicken: 'Chicken', pork: 'Pork', beef: 'Beef', fish: 'Seafood', tofu: 'Tofu/Veg', egg: 'Egg' };
         var mealDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
         function getByProtein(p) {
+            var ids = proteinCategories[p] || [];
             var arr = [];
-            for (var i = 0; i < mealRecipes.length; i++) {
-                if (mealRecipes[i].p === p) arr.push(mealRecipes[i]);
+            for (var i = 0; i < ids.length; i++) {
+                var rec = recipes.find(function(r) { return r.id === ids[i]; });
+                if (rec) arr.push(rec);
             }
             return arr;
         }
@@ -5665,7 +5626,6 @@
             return arr;
         }
 
-        // Store generated meal plans for shopping list
         var generatedPlans = [];
 
         function refreshMealPlans() {
@@ -5680,7 +5640,9 @@
             ];
 
             generatedPlans = [];
+            var usedRecipes = new Set();
             var html = '';
+            
             for (var t = 0; t < themes.length; t++) {
                 var proteins = shuffleArr(['chicken', 'pork', 'beef', 'fish', 'tofu', 'egg']);
                 var planRecipes = [];
@@ -5695,19 +5657,26 @@
                 for (var d = 0; d < 6; d++) {
                     var p = proteins[d];
                     var choices = getByProtein(p);
-                    var recipe = choices[Math.floor(Math.random() * choices.length)];
-                    planRecipes.push(recipe);
+                    var available = choices.filter(function(r) { return !usedRecipes.has(r.id); });
+                    
+                    if (available.length === 0) available = choices; // Fallback if we run out
+                    
+                    var recipe = available[Math.floor(Math.random() * available.length)];
+                    if (recipe) {
+                        usedRecipes.add(recipe.id);
+                        planRecipes.push(recipe);
 
-                    html += '<div class="day-row">';
-                    html += '<span class="day-label">' + mealDays[d] + '</span>';
-                    html += '<span class="protein-badge">' + mealEmoji[p] + ' ' + mealNames[p] + '</span>';
-                    html += '<div class="day-recipe">';
-                    html += '<a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a>';
-                    if (recipe.ing && recipe.ing.length > 0) {
-                        html += '<div class="day-ingredients">' + recipe.ing.join(', ') + '</div>';
+                        html += '<div class="day-row">';
+                        html += '<span class="day-label">' + mealDays[d] + '</span>';
+                        html += '<span class="protein-badge">' + mealEmoji[p] + ' ' + mealNames[p] + '</span>';
+                        html += '<div class="day-recipe">';
+                        html += '<a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a>';
+                        if (recipe.ingredients && recipe.ingredients.length > 0) {
+                            html += '<div class="day-ingredients">' + recipe.ingredients.join(', ') + '</div>';
+                        }
+                        html += '</div>';
+                        html += '</div>';
                     }
-                    html += '</div>';
-                    html += '</div>';
                 }
 
                 generatedPlans.push({ theme: themes[t].name, recipes: planRecipes });
@@ -5721,56 +5690,44 @@
             var plan = generatedPlans[planIndex];
             if (!plan) return;
 
-            // Collect and group ingredients
             var allIngredients = [];
             for (var i = 0; i < plan.recipes.length; i++) {
                 var recipe = plan.recipes[i];
-                if (recipe.ing) {
-                    for (var j = 0; j < recipe.ing.length; j++) {
-                        allIngredients.push(recipe.ing[j]);
+                if (recipe.ingredients) {
+                    for (var j = 0; j < recipe.ingredients.length; j++) {
+                        allIngredients.push(recipe.ingredients[j]);
                     }
                 }
             }
 
-            // Count duplicates
             var ingredientCounts = {};
             for (var i = 0; i < allIngredients.length; i++) {
                 var ing = allIngredients[i].toLowerCase().trim();
                 ingredientCounts[ing] = (ingredientCounts[ing] || 0) + 1;
             }
 
-            // Sort by frequency
             var sorted = Object.keys(ingredientCounts).sort(function (a, b) {
                 return ingredientCounts[b] - ingredientCounts[a];
             });
 
-            // Build shopping list HTML
-            var listHtml = '<div class="shopping-list-modal">';
-            listHtml += '<div class="shopping-list-content">';
-            listHtml += '<div class="shopping-list-header">';
+            var listHtml = '<div class="shopping-list-modal"><div class="shopping-list-content"><div class="shopping-list-header">';
             listHtml += '<h3>🛒 Shopping List: ' + plan.theme + '</h3>';
-            listHtml += '<a href="javascript:void(0)" class="close-btn" onclick="closeShoppingList()">✕</a>';
-            listHtml += '</div>';
+            listHtml += '<a href="javascript:void(0)" class="close-btn" onclick="closeShoppingList()">✕</a></div>';
             listHtml += '<p class="shopping-list-subtitle">Ingredients for 6 meals (' + sorted.length + ' items)</p>';
             listHtml += '<div class="shopping-list-items">';
 
             for (var i = 0; i < sorted.length; i++) {
                 var ing = sorted[i];
                 var count = ingredientCounts[ing];
-                listHtml += '<div class="shopping-item">';
-                listHtml += '<input type="checkbox" id="item-' + i + '">';
-                listHtml += '<label for="item-' + i + '">' + ing;
+                listHtml += '<div class="shopping-item"><input type="checkbox" id="item-' + i + '"><label for="item-' + i + '">' + ing;
                 if (count > 1) listHtml += ' <span class="item-count">(×' + count + ')</span>';
                 listHtml += '</label></div>';
             }
 
-            listHtml += '</div>';
-            listHtml += '<div class="shopping-list-actions">';
+            listHtml += '</div><div class="shopping-list-actions">';
             listHtml += '<a href="javascript:void(0)" class="copy-list-btn" onclick="copyShoppingList()">📋 Copy List</a>';
-            listHtml += '</div>';
-            listHtml += '</div></div>';
+            listHtml += '</div></div></div>';
 
-            // Store for copy function
             window.currentShoppingList = sorted.map(function (ing) {
                 var count = ingredientCounts[ing];
                 return count > 1 ? ing + ' (×' + count + ')' : ing;
@@ -5797,7 +5754,6 @@
 
         // ===== FRIDGE MODE FUNCTIONS =====
         var fridgeSelected = [];
-
         var fridgeInitialized = false;
 
         function initFridge() {
@@ -5840,18 +5796,17 @@
 
             countEl.textContent = fridgeSelected.length + ' ingredient' + (fridgeSelected.length > 1 ? 's' : '') + ' selected';
 
-            // Use the mealRecipes array which has ingredient data
             var matches = [];
-            for (var i = 0; i < mealRecipes.length; i++) {
-                var recipe = mealRecipes[i];
-                if (!recipe.ing) continue;
+            for (var i = 0; i < recipes.length; i++) {
+                var recipe = recipes[i];
+                if (!recipe.ingredients) continue;
 
                 var matchCount = 0;
                 var matchedIngs = [];
                 var missingIngs = [];
 
-                for (var j = 0; j < recipe.ing.length; j++) {
-                    var recipeIng = recipe.ing[j].toLowerCase();
+                for (var j = 0; j < recipe.ingredients.length; j++) {
+                    var recipeIng = recipe.ingredients[j].toLowerCase();
                     var found = false;
                     for (var k = 0; k < fridgeSelected.length; k++) {
                         if (recipeIng.indexOf(fridgeSelected[k]) !== -1 || fridgeSelected[k].indexOf(recipeIng) !== -1) {
@@ -5861,9 +5816,9 @@
                     }
                     if (found) {
                         matchCount++;
-                        matchedIngs.push(recipe.ing[j]);
+                        matchedIngs.push(recipe.ingredients[j]);
                     } else {
-                        missingIngs.push(recipe.ing[j]);
+                        missingIngs.push(recipe.ingredients[j]);
                     }
                 }
 
@@ -5871,15 +5826,14 @@
                     matches.push({
                         recipe: recipe,
                         matchCount: matchCount,
-                        total: recipe.ing.length,
+                        total: recipe.ingredients.length,
                         matchedIngs: matchedIngs,
                         missingIngs: missingIngs,
-                        percent: Math.round((matchCount / recipe.ing.length) * 100)
+                        percent: Math.round((matchCount / recipe.ingredients.length) * 100)
                     });
                 }
             }
 
-            // Sort by match percentage
             matches.sort(function (a, b) {
                 return b.percent - a.percent || b.matchCount - a.matchCount;
             });
@@ -5924,7 +5878,6 @@
             resultsEl.innerHTML = html;
         }
 
-        // Initialize fridge when DOM is ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', initFridge);
         } else {
@@ -5932,6 +5885,7 @@
         }
 
         // ===== FAVORITES & NOTES FUNCTIONS =====
+
         var favorites = JSON.parse(localStorage.getItem('recipeFavorites') || '{}');
         var notes = JSON.parse(localStorage.getItem('recipeNotes') || '{}');
 
