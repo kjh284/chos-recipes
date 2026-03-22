@@ -549,6 +549,11 @@
             color: #333;
             text-decoration: none;
             font-weight: 500;
+            flex: 1;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .day-recipe a:hover {
@@ -560,6 +565,11 @@
             font-size: 0.75em;
             margin-top: 4px;
             line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            min-height: 1.4em;
         }
 
         .shopping-list-btn {
@@ -5689,9 +5699,9 @@
                 newHtml += '<button class="heart-btn' + (favorites[newRecipe.id] ? ' favorited' : '') + '" data-id="' + newRecipe.id + '" onclick="toggleFavorite(\'' + newRecipe.id + '\', \'' + newRecipe.name.replace(/'/g, "\\'") + '\', \'' + newRecipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[newRecipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
                 newHtml += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="margin-left: auto; padding: 2px 8px; font-size: 0.8em; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
                 
-                if (newRecipe.ingredients && newRecipe.ingredients.length > 0) {
-                    newHtml += '<div class="day-ingredients" style="width: 100%; margin-top: 4px;">' + newRecipe.ingredients.join(', ') + '</div>';
-                }
+                var ingText = (newRecipe.ingredients && newRecipe.ingredients.length > 0) ? newRecipe.ingredients.join(', ') : 'No specific ingredients listed';
+                newHtml += '<div class="day-ingredients">' + ingText + '</div>';
+                
                 recipeContainer.innerHTML = newHtml;
             }
         }
@@ -5738,14 +5748,15 @@
                         html += '<div class="day-row" id="mealplan-' + t + '-day-' + d + '">';
                         html += '<span class="day-label">' + mealDays[d] + '</span>';
                         html += '<span class="protein-badge">' + mealEmoji[p] + ' ' + mealNames[p] + '</span>';
-                        html += '<div class="day-recipe" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1;">';
+                        html += '<div class="day-recipe" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0;">';
                         var count = globalLikes[recipe.id] || 0;
                         html += '<a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a>';
                         html += '<button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[recipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
                         html += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="margin-left: auto; padding: 2px 8px; font-size: 0.8em; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
-                        if (recipe.ingredients && recipe.ingredients.length > 0) {
-                            html += '<div class="day-ingredients" style="width: 100%; margin-top: 4px;">' + recipe.ingredients.join(', ') + '</div>';
-                        }
+                        
+                        var ingText = (recipe.ingredients && recipe.ingredients.length > 0) ? recipe.ingredients.join(', ') : 'No specific ingredients listed';
+                        html += '<div class="day-ingredients">' + ingText + '</div>';
+                        
                         html += '</div>';
                         html += '</div>';
                     }
