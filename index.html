@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kevin's Recipe Dashboard</title>
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -5605,7 +5607,7 @@
         // ===== GLOBAL MEAL PLAN FUNCTIONS (Safari compatible) =====
         var mealEmoji = { chicken: '🐔', pork: '🐷', beef: '🐄', fish: '🐟', tofu: '🧈', egg: '🥚' };
         var mealNames = { chicken: 'Chicken', pork: 'Pork', beef: 'Beef', fish: 'Seafood', tofu: 'Tofu/Veg', egg: 'Egg' };
-        var mealDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var mealDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
         function getByProtein(p) {
             var ids = proteinCategories[p] || [];
@@ -5628,6 +5630,72 @@
 
         var generatedPlans = [];
 
+        function copyGeneratedPlan(event, index) {
+            var plan = generatedPlans[index];
+            if (!plan) return;
+            
+            var text = plan.theme + ' Meal Plan\n';
+            text += '------------------------\n\n';
+            
+            plan.recipes.forEach(function(recipe, i) {
+                var d = i % plan.days.length;
+                var p = plan.proteins[d];
+                text += '📅 ' + plan.days[d] + '\n';
+                text += '🥩 Protein: ' + mealNames[p] + '\n';
+                text += '🍽️ Dish: ' + recipe.name + '\n';
+                text += '🔗 Link: ' + recipe.url + '\n';
+                if (recipe.ingredients && recipe.ingredients.length > 0) {
+                    text += '🛒 Ingredients: ' + recipe.ingredients.join(', ') + '\n';
+                }
+                text += '\n';
+            });
+            
+            navigator.clipboard.writeText(text).then(function() {
+                var btn = event.currentTarget || event.target;
+                var oldText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied to Chat!';
+                btn.style.background = '#28a745';
+                setTimeout(function() { 
+                    btn.innerHTML = oldText; 
+                    btn.style.background = '#17a2b8';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy. Try on an HTTPS connection.');
+            });
+        }
+
+        function swapRecipeForDay(event, t, d) {
+            if(event) event.stopPropagation();
+            var plan = generatedPlans[t];
+            var p = plan.proteins[d];
+            var oldRecipe = plan.recipes[d];
+            
+            // Choose new recipe
+            var choices = getByProtein(p);
+            var available = choices.filter(function(r) { return r.id !== oldRecipe.id; });
+            if(available.length === 0) available = choices; // Fallback
+            var newRecipe = available[Math.floor(Math.random() * available.length)];
+            
+            // Update state
+            plan.recipes[d] = newRecipe;
+            
+            // Update DOM
+            var rowElement = document.getElementById('mealplan-' + t + '-day-' + d);
+            if(rowElement) {
+                var recipeContainer = rowElement.querySelector('.day-recipe');
+                var count = globalLikes[newRecipe.id] || 0;
+                var newHtml = '<a href="' + newRecipe.url + '" target="_blank">' + newRecipe.name + '</a>';
+                newHtml += '<button class="heart-btn' + (favorites[newRecipe.id] ? ' favorited' : '') + '" data-id="' + newRecipe.id + '" onclick="toggleFavorite(\'' + newRecipe.id + '\', \'' + newRecipe.name.replace(/'/g, "\\'") + '\', \'' + newRecipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[newRecipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
+                newHtml += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="padding: 2px 8px; font-size: 0.8em; margin-left: 5px; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
+                
+                if (newRecipe.ingredients && newRecipe.ingredients.length > 0) {
+                    newHtml += '<div class="day-ingredients" style="width: 100%; margin-top: 4px;">' + newRecipe.ingredients.join(', ') + '</div>';
+                }
+                recipeContainer.innerHTML = newHtml;
+            }
+        }
+
         function refreshMealPlans() {
             var container = document.getElementById('mealPlansContainer');
             if (!container) return;
@@ -5645,6 +5713,7 @@
             
             for (var t = 0; t < themes.length; t++) {
                 var proteins = shuffleArr(['chicken', 'pork', 'beef', 'fish', 'tofu', 'egg']);
+                proteins.push(proteins[Math.floor(Math.random() * 6)]); // Add Sunday
                 var planRecipes = [];
 
                 html += '<div class="meal-plan-card' + (t === 0 ? ' active' : '') + '">';
@@ -5654,7 +5723,7 @@
                 html += '<div class="meal-plan-content"><div class="meal-plan-body">';
                 html += '<p style="color:#666;margin-bottom:15px;font-size:0.9em">' + themes[t].desc + '</p>';
 
-                for (var d = 0; d < 6; d++) {
+                for (var d = 0; d < 7; d++) {
                     var p = proteins[d];
                     var choices = getByProtein(p);
                     var available = choices.filter(function(r) { return !usedRecipes.has(r.id); });
@@ -5666,21 +5735,32 @@
                         usedRecipes.add(recipe.id);
                         planRecipes.push(recipe);
 
-                        html += '<div class="day-row">';
+                        html += '<div class="day-row" id="mealplan-' + t + '-day-' + d + '">';
                         html += '<span class="day-label">' + mealDays[d] + '</span>';
                         html += '<span class="protein-badge">' + mealEmoji[p] + ' ' + mealNames[p] + '</span>';
-                        html += '<div class="day-recipe">';
+                        html += '<div class="day-recipe" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">';
+                        var count = globalLikes[recipe.id] || 0;
                         html += '<a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a>';
+                        html += '<button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[recipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
+                        html += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="padding: 2px 8px; font-size: 0.8em; margin-left: 5px; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
                         if (recipe.ingredients && recipe.ingredients.length > 0) {
-                            html += '<div class="day-ingredients">' + recipe.ingredients.join(', ') + '</div>';
+                            html += '<div class="day-ingredients" style="width: 100%; margin-top: 4px;">' + recipe.ingredients.join(', ') + '</div>';
                         }
                         html += '</div>';
                         html += '</div>';
                     }
                 }
 
-                generatedPlans.push({ theme: themes[t].name, recipes: planRecipes });
-                html += '<a href="javascript:void(0)" class="shopping-list-btn" onclick="showShoppingList(' + t + ')">🛒 Generate Shopping List</a>';
+                generatedPlans.push({ 
+                    theme: themes[t].emoji + ' ' + themes[t].name, 
+                    recipes: planRecipes,
+                    days: mealDays,
+                    proteins: proteins
+                });
+                html += '<div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">';
+                html += '<a href="javascript:void(0)" class="shopping-list-btn" style="margin-top:0;" onclick="showShoppingList(' + t + ')">🛒 Generate Shopping List</a>';
+                html += '<a href="javascript:void(0)" class="shopping-list-btn" style="margin-top:0; background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);" onclick="copyGeneratedPlan(event, ' + t + ')">📋 Copy Plan to Chat</a>';
+                html += '</div>';
                 html += '</div></div></div>';
             }
             container.innerHTML = html;
@@ -5889,6 +5969,35 @@
         var favorites = JSON.parse(localStorage.getItem('recipeFavorites') || '{}');
         var notes = JSON.parse(localStorage.getItem('recipeNotes') || '{}');
 
+        // ===== SUPABASE INITIALIZATION =====
+        const SUPABASE_URL = 'https://xdxaugjyfpmffctbujsb.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhkeGF1Z2p5ZnBtZmZjdGJ1anNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxODkyMDMsImV4cCI6MjA4OTc2NTIwM30.GB9xvl0PLnaA63WEKRqePdtGktKX76RGB9O5lko9yoU';
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let globalLikes = {};
+
+        async function fetchGlobalLikes() {
+            try {
+                let { data, error } = await supabaseClient.from('recipe_favorites').select('*');
+                if (data && !error) {
+                    globalLikes = {};
+                    data.forEach(row => {
+                        globalLikes[row.recipe_id] = row.likes_count;
+                    });
+                    updateAllHeartButtons();
+                }
+            } catch (e) {
+                console.error('Error fetching global likes:', e);
+            }
+        }
+
+        function updateAllHeartButtons() {
+            document.querySelectorAll('.heart-btn').forEach(function(btn) {
+                var id = btn.getAttribute('data-id');
+                var count = globalLikes[id] || 0;
+                btn.textContent = (favorites[id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '');
+            });
+        }
+
         function saveFavorites() {
             localStorage.setItem('recipeFavorites', JSON.stringify(favorites));
         }
@@ -5897,23 +6006,32 @@
             localStorage.setItem('recipeNotes', JSON.stringify(notes));
         }
 
-        function toggleFavorite(recipeId, recipeName, recipeUrl) {
+        async function toggleFavorite(recipeId, recipeName, recipeUrl) {
             var btn = document.querySelector('.heart-btn[data-id="' + recipeId + '"]');
-            if (favorites[recipeId]) {
-                delete favorites[recipeId];
-                if (btn) {
-                    btn.classList.remove('favorited');
-                    btn.textContent = '♡';
-                }
-            } else {
+            var isLiking = !favorites[recipeId];
+            
+            if (isLiking) {
                 favorites[recipeId] = { name: recipeName, url: recipeUrl, addedAt: Date.now() };
-                if (btn) {
-                    btn.classList.add('favorited');
-                    btn.textContent = '❤️';
-                }
+                globalLikes[recipeId] = (globalLikes[recipeId] || 0) + 1;
+                if (btn) btn.classList.add('favorited');
+            } else {
+                delete favorites[recipeId];
+                globalLikes[recipeId] = Math.max(0, (globalLikes[recipeId] || 1) - 1);
+                if (btn) btn.classList.remove('favorited');
             }
+            
+            updateAllHeartButtons();
             saveFavorites();
             renderFavorites();
+
+            try {
+                await supabaseClient.from('recipe_favorites').upsert({
+                    recipe_id: recipeId.toString(),
+                    likes_count: globalLikes[recipeId]
+                });
+            } catch (e) {
+                console.error("Error updating supabase:", e);
+            }
         }
 
         function openNoteModal(recipeId, recipeName) {
@@ -6054,7 +6172,8 @@
                 var heartBtn = document.createElement('button');
                 heartBtn.className = 'heart-btn' + (favorites[id] ? ' favorited' : '');
                 heartBtn.setAttribute('data-id', id);
-                heartBtn.textContent = favorites[id] ? '❤️' : '♡';
+                var count = globalLikes[id] || 0;
+                heartBtn.textContent = (favorites[id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '');
                 heartBtn.onclick = function () { toggleFavorite(id, name, url); };
 
                 var noteBtn = document.createElement('button');
@@ -6088,11 +6207,13 @@
                 initFavoritesOnCards();
                 renderFavorites();
                 renderCustomRecipes();
+                fetchGlobalLikes();
             });
         } else {
             initFavoritesOnCards();
             renderFavorites();
             renderCustomRecipes();
+            fetchGlobalLikes();
         }
 
         // ===== ADD RECIPE FUNCTIONS =====
@@ -6181,7 +6302,7 @@
                     return '<span class="ing-tag" data-ing="' + ing + '">' + ing + '</span>';
                 }).join('');
 
-                card.innerHTML = '<div class="recipe-card-header"><h3>🆕 ' + recipe.name + '<span class="custom-recipe-badge">Custom</span></h3><div class="recipe-actions"><button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')">' + (favorites[recipe.id] ? '❤️' : '♡') + '</button><button class="note-btn' + (notes[recipe.id] ? ' has-note' : '') + '" data-id="' + recipe.id + '" onclick="openNoteModal(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\')">📝</button><button class="delete-custom-btn" onclick="deleteCustomRecipe(\'' + recipe.id + '\')" title="Delete recipe">🗑️</button></div></div><a href="' + recipe.url + '" target="_blank">▶️ Watch on YouTube</a><div class="ing-tags">' + ingTags + '</div><div class="recipe-note-display" data-id="' + recipe.id + '">' + (notes[recipe.id] ? '<div class="recipe-note">"' + notes[recipe.id] + '"</div>' : '') + '</div>';
+                card.innerHTML = '<div class="recipe-card-header"><h3>🆕 ' + recipe.name + '<span class="custom-recipe-badge">Custom</span></h3><div class="recipe-actions"><button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')">' + (favorites[recipe.id] ? '❤️' : '♡') + ((globalLikes[recipe.id] || 0) > 0 ? ' ' + globalLikes[recipe.id] : '') + '</button><button class="note-btn' + (notes[recipe.id] ? ' has-note' : '') + '" data-id="' + recipe.id + '" onclick="openNoteModal(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\')">📝</button><button class="delete-custom-btn" onclick="deleteCustomRecipe(\'' + recipe.id + '\')" title="Delete recipe">🗑️</button></div></div><a href="' + recipe.url + '" target="_blank">▶️ Watch on YouTube</a><div class="ing-tags">' + ingTags + '</div><div class="recipe-note-display" data-id="' + recipe.id + '">' + (notes[recipe.id] ? '<div class="recipe-note">"' + notes[recipe.id] + '"</div>' : '') + '</div>';
 
                 grid.insertBefore(card, grid.firstChild);
             }
@@ -6421,7 +6542,7 @@
         };
 
         // Day names
-        var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
         // Shuffle array helper
         function shuffleArray(array) {
@@ -6476,10 +6597,11 @@
         // Generate a single meal plan
         function generateMealPlan(theme, emoji, description) {
             var proteins = shuffleArray(['chicken', 'pork', 'beef', 'fish', 'tofu', 'egg']);
+            proteins.push(proteins[Math.floor(Math.random() * 6)]); // Add Sunday
             var usedIds = [];
             var planDays = [];
 
-            for (var i = 0; i < 6; i++) {
+            for (var i = 0; i < 7; i++) {
                 var protein = proteins[i];
                 var recipeId = getRandomRecipeFromProtein(protein, usedIds);
                 usedIds.push(recipeId);
@@ -6508,13 +6630,58 @@
             { name: 'Quick & Easy', emoji: '⚡', desc: 'Simple meals for busy weeknights' }
         ];
 
+        var activeMealPlans = [];
+
+        function copyMealPlan(event, index) {
+            var plan = activeMealPlans[index];
+            if (!plan) return;
+            
+            var text = plan.emoji + ' ' + plan.name + ' Meal Plan\n';
+            text += '------------------------\n\n';
+            
+            plan.days.forEach(function(day) {
+                var recipe = getRecipeById(day.recipeId);
+                if (recipe) {
+                    text += '📅 ' + day.day + '\n';
+                    text += '🥩 Protein: ' + proteinNames[day.protein] + '\n';
+                    text += '🍽️ Dish: ' + recipe.name + '\n';
+                    text += '🔗 Link: ' + recipe.url + '\n';
+                    if (recipe.ingredients && recipe.ingredients.length > 0) {
+                        text += '🛒 Ingredients: ' + recipe.ingredients.join(', ') + '\n';
+                    }
+                    text += '\n';
+                }
+            });
+            
+            if (plan.sharedIngredients && plan.sharedIngredients.length > 0) {
+                text += '🛒 Shared Ingredients:\n';
+                text += plan.sharedIngredients.join(', ') + '\n';
+            }
+            
+            navigator.clipboard.writeText(text).then(function() {
+                var btn = event.currentTarget || event.target;
+                var oldText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied to Clipboard!';
+                btn.style.background = '#28a745';
+                setTimeout(function() { 
+                    btn.innerHTML = oldText; 
+                    btn.style.background = '#20c997';
+                }, 2000);
+            }).catch(function(err) {
+                console.error('Could not copy text: ', err);
+                alert('Failed to copy. Your browser might not support this feature without HTTPS.');
+            });
+        }
+
         // Render meal plans
         function renderMealPlans() {
             var container = document.getElementById('mealPlansContainer');
             container.innerHTML = '';
+            activeMealPlans = [];
 
             planThemes.forEach(function (theme, index) {
                 var plan = generateMealPlan(theme.name, theme.emoji, theme.desc);
+                activeMealPlans.push(plan);
 
                 var cardHtml = '<div class="meal-plan-card' + (index === 0 ? ' active' : '') + '">';
                 cardHtml += '<div class="meal-plan-header">';
@@ -6530,7 +6697,11 @@
                         cardHtml += '<div class="day-row">';
                         cardHtml += '<span class="day-label">' + day.day + '</span>';
                         cardHtml += '<span class="protein-badge">' + proteinEmoji[day.protein] + ' ' + proteinNames[day.protein] + '</span>';
-                        cardHtml += '<div class="day-recipe"><a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a></div>';
+                        var favCount = globalLikes[recipe.id] || 0;
+                        cardHtml += '<div class="day-recipe" style="display: flex; align-items: center; gap: 8px;">';
+                        cardHtml += '<a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a>';
+                        cardHtml += '<button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[recipe.id] ? '❤️' : '♡') + (favCount > 0 ? ' ' + favCount : '') + '</button>';
+                        cardHtml += '</div>';
                         cardHtml += '</div>';
                     }
                 });
@@ -6544,6 +6715,10 @@
                     });
                     cardHtml += '</div></div>';
                 }
+
+                cardHtml += '<div style="margin-top: 20px; text-align: right;">';
+                cardHtml += '<button class="copy-list-btn" onclick="copyMealPlan(event, ' + index + ')" style="padding: 10px 20px; font-size: 0.9em; background: #20c997; border: none; cursor: pointer; transition: background 0.2s;">📋 Copy Plan to Chat</button>';
+                cardHtml += '</div>';
 
                 cardHtml += '</div></div></div>';
                 container.innerHTML += cardHtml;
