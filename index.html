@@ -6117,32 +6117,79 @@
             var container = document.getElementById('favoritesContainer');
             if (!container) return;
 
-            var favIds = Object.keys(favorites);
+            var favIdsSet = new Set(Object.keys(favorites)); // User's personal
+            Object.keys(globalLikes).forEach(id => {
+                if (globalLikes[id] > 0) {
+                    favIdsSet.add(id);
+                }
+            });
+            var favIds = Array.from(favIdsSet);
+
             if (favIds.length === 0) {
                 container.innerHTML = '<div class="favorites-empty"><div class="favorites-empty-icon">💔</div><h3>No favorites yet</h3><p>Click the ♡ heart icon on any recipe to save it here!</p></div>';
                 return;
             }
 
-            // Sort by most recently added
+            // Map IDs to recipe objects
+            var allRecipesList = [...recipes, ...customRecipes];
+            var recipeLookup = {};
+            allRecipesList.forEach(r => {
+                recipeLookup[r.id.toString()] = r;
+            });
+
+            // Sort by global likes count descending, then personal addedAt
             favIds.sort(function (a, b) {
-                return (favorites[b].addedAt || 0) - (favorites[a].addedAt || 0);
+                var likesA = globalLikes[a] || 0;
+                var likesB = globalLikes[b] || 0;
+                if (likesB !== likesA) {
+                    return likesB - likesA; 
+                }
+                var addedA = (favorites[a] && favorites[a].addedAt) ? favorites[a].addedAt : 0;
+                var addedB = (favorites[b] && favorites[b].addedAt) ? favorites[b].addedAt : 0;
+                return addedB - addedA;
             });
 
             var html = '<div class="favorites-grid">';
             for (var i = 0; i < favIds.length; i++) {
                 var id = favIds[i];
-                var fav = favorites[id];
+                var name = "";
+                var url = "";
+                
+                if (recipeLookup[id]) {
+                    name = recipeLookup[id].name;
+                    url = recipeLookup[id].url;
+                } else if (favorites[id]) {
+                    name = favorites[id].name;
+                    url = favorites[id].url;
+                } else {
+                    continue; // Skip if we have no metadata at all
+                }
+
                 var note = notes[id];
+                var globalCount = globalLikes[id] || 0;
+                var isLocalFav = !!favorites[id];
 
                 html += '<div class="favorite-card">';
-                html += '<h4>' + fav.name + '</h4>';
-                html += '<a href="' + fav.url + '" target="_blank">▶️ Watch Video</a>';
+                html += '<h4>' + name + '</h4>';
+                
+                if (globalCount > 0) {
+                   html += '<span class="global-likes-badge" style="background:#ff4757; color:white; padding:2px 8px; border-radius:12px; font-size:12px; margin-bottom:10px; display:inline-block;">❤️ ' + globalCount + ' Favorited</span><br/>';
+                }
+                
+                html += '<a href="' + url + '" target="_blank">▶️ Watch Video</a>';
+                
                 if (note) {
                     html += '<div class="recipe-note">"' + note + '"</div>';
                 }
                 html += '<div class="favorite-actions">';
-                html += '<button onclick="openNoteModal(\'' + id + '\', \'' + fav.name.replace(/'/g, "\\'") + '\')">' + (note ? '✏️ Edit Note' : '📝 Add Note') + '</button>';
-                html += '<button onclick="removeFavorite(\'' + id + '\')">💔 Remove</button>';
+                html += '<button onclick="openNoteModal(\'' + id + '\', \'' + name.replace(/'/g, "\\'") + '\')">' + (note ? '✏️ Edit Note' : '📝 Add Note') + '</button>';
+                
+                if (isLocalFav) {
+                    html += '<button onclick="removeFavorite(\'' + id + '\')">💔 Remove</button>';
+                } else {
+                    html += '<button onclick="toggleFavorite(\'' + id + '\', \'' + name.replace(/'/g, "\\'") + '\', \'' + url + '\')">❤️ Like It Too!</button>';
+                }
+
                 html += '</div>';
                 html += '</div>';
             }
