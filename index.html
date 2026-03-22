@@ -6259,21 +6259,6 @@
             });
         }
 
-        // Initialize favorites when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function () {
-                initFavoritesOnCards();
-                renderFavorites();
-                renderCustomRecipes();
-                fetchGlobalLikes();
-            });
-        } else {
-            initFavoritesOnCards();
-            renderFavorites();
-            renderCustomRecipes();
-            fetchGlobalLikes();
-        }
-
         // ===== ADD RECIPE FUNCTIONS =====
         var customRecipes = JSON.parse(localStorage.getItem('customRecipes') || '[]');
 
@@ -6865,6 +6850,20 @@
         }
         // });
         // Initialize
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () {
+                initFavoritesOnCards();
+                renderFavorites();
+                renderCustomRecipes();
+                fetchGlobalLikes();
+            });
+        } else {
+            initFavoritesOnCards();
+            renderFavorites();
+            renderCustomRecipes();
+            fetchGlobalLikes();
+        }
+
         if (typeof refreshMealPlans === 'function') {
             refreshMealPlans();
         }
