@@ -5995,6 +5995,7 @@
                         globalLikes[row.recipe_id] = row.likes_count;
                     });
                     updateAllHeartButtons();
+                    renderFavorites();
                 }
             } catch (e) {
                 console.error('Error fetching global likes:', e);
