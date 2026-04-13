@@ -551,9 +551,8 @@
             font-weight: 500;
             flex: 1;
             min-width: 0;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            line-height: 1.3;
         }
 
         .day-recipe a:hover {
@@ -5700,9 +5699,12 @@
             if(rowElement) {
                 var recipeContainer = rowElement.querySelector('.day-recipe');
                 var count = globalLikes[newRecipe.id] || 0;
-                var newHtml = '<a href="' + newRecipe.url + '" target="_blank">' + newRecipe.name + '</a>';
-                newHtml += '<button class="heart-btn' + (favorites[newRecipe.id] ? ' favorited' : '') + '" data-id="' + newRecipe.id + '" onclick="toggleFavorite(\'' + newRecipe.id + '\', \'' + newRecipe.name.replace(/'/g, "\\'") + '\', \'' + newRecipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[newRecipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
-                newHtml += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="margin-left: auto; padding: 2px 8px; font-size: 0.8em; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
+                var newHtml = '<div style="display: flex; width: 100%; align-items: flex-start; justify-content: space-between; gap: 8px;">';
+                newHtml += '<a href="' + newRecipe.url + '" target="_blank">' + newRecipe.name + '</a>';
+                newHtml += '<div style="display: flex; gap: 5px; flex-shrink: 0; align-items: center;">';
+                newHtml += '<button class="heart-btn' + (favorites[newRecipe.id] ? ' favorited' : '') + '" data-id="' + newRecipe.id + '" onclick="toggleFavorite(\'' + newRecipe.id + '\', \'' + newRecipe.name.replace(/'/g, "\\'") + '\', \'' + newRecipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer;">' + (favorites[newRecipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
+                newHtml += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="padding: 2px 8px; font-size: 0.8em; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
+                newHtml += '</div></div>';
                 
                 var ingText = (newRecipe.ingredients && newRecipe.ingredients.length > 0) ? newRecipe.ingredients.join(', ') : 'No specific ingredients listed';
                 newHtml += '<div class="day-ingredients">' + ingText + '</div>';
@@ -5753,11 +5755,14 @@
                         html += '<div class="day-row" id="mealplan-' + t + '-day-' + d + '">';
                         html += '<span class="day-label">' + mealDays[d] + '</span>';
                         html += '<span class="protein-badge">' + mealEmoji[p] + ' ' + mealNames[p] + '</span>';
-                        html += '<div class="day-recipe" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; min-width: 0;">';
+                        html += '<div class="day-recipe" style="display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0;">';
                         var count = globalLikes[recipe.id] || 0;
+                        html += '<div style="display: flex; width: 100%; align-items: flex-start; justify-content: space-between; gap: 8px;">';
                         html += '<a href="' + recipe.url + '" target="_blank">' + recipe.name + '</a>';
-                        html += '<button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em;">' + (favorites[recipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
-                        html += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="margin-left: auto; padding: 2px 8px; font-size: 0.8em; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
+                        html += '<div style="display: flex; gap: 5px; flex-shrink: 0; align-items: center;">';
+                        html += '<button class="heart-btn' + (favorites[recipe.id] ? ' favorited' : '') + '" data-id="' + recipe.id + '" onclick="toggleFavorite(\'' + recipe.id + '\', \'' + recipe.name.replace(/'/g, "\\'") + '\', \'' + recipe.url + '\')" style="padding: 2px 8px; font-size: 0.8em; border-radius: 20px; border: 1px solid #ccc; background: white; cursor: pointer;">' + (favorites[recipe.id] ? '❤️' : '♡') + (count > 0 ? ' ' + count : '') + '</button>';
+                        html += '<button class="swap-btn" onclick="swapRecipeForDay(event, ' + t + ', ' + d + ')" style="padding: 2px 8px; font-size: 0.8em; cursor: pointer; border-radius: 20px; border: 1px solid #ccc; background: #f8f9fa; transition: all 0.2s;" title="Swap this recipe">🔄 Swap</button>';
+                        html += '</div></div>';
                         
                         var ingText = (recipe.ingredients && recipe.ingredients.length > 0) ? recipe.ingredients.join(', ') : 'No specific ingredients listed';
                         html += '<div class="day-ingredients">' + ingText + '</div>';
