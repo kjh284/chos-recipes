@@ -5626,9 +5626,31 @@
         function getByProtein(p) {
             var ids = proteinCategories[p] || [];
             var arr = [];
+            var excludeWords = ["salad", "gazpacho", "side dish", "toast", "smoothie", "juice", "appetizer", "snack", "bread", "무침", "샐러드", "가스파초", "스무디", "주스", "토스트", "나물", "반찬", "pancake"];
+            
             for (var i = 0; i < ids.length; i++) {
                 var rec = recipes.find(function(r) { return r.id === ids[i]; });
-                if (rec) arr.push(rec);
+                if (rec) {
+                    var lowerName = rec.name.toLowerCase();
+                    var isLight = false;
+                    for (var k = 0; k < excludeWords.length; k++) {
+                        if (lowerName.indexOf(excludeWords[k]) !== -1) {
+                            isLight = true;
+                            break;
+                        }
+                    }
+                    if (!isLight) {
+                        arr.push(rec);
+                    }
+                }
+            }
+            
+            // Fallback: If filtering removes everything, return unfiltered list
+            if (arr.length === 0) {
+                for (var i = 0; i < ids.length; i++) {
+                    var rec = recipes.find(function(r) { return r.id === ids[i]; });
+                    if (rec) arr.push(rec);
+                }
             }
             return arr;
         }
